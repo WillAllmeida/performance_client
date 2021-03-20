@@ -45,7 +45,7 @@ namespace mvp_step1_client
 
             Console.WriteLine(path);
 
-            using (Stream fileStream = File.Create(path + "test.parquet"))
+            using (Stream fileStream = File.Create(path + "/test.parquet"))
             {
                 using (var parquetWriter = new ParquetWriter(schema, fileStream))
                 {

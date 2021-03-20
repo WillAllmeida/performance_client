@@ -41,7 +41,6 @@ namespace mvp_step1_client
             // create file schema
             var schema = new Schema(indexColumn.Field, requestColumn.Field);
 
-
             string path = Directory.GetCurrentDirectory();
 
             path += "/../../../";

@@ -43,7 +43,6 @@ namespace mvp_step1_client
 
             string path = Directory.GetCurrentDirectory();
 
-            path += "/../";
             Console.WriteLine(path);
 
             using (Stream fileStream = File.Create(path + "test.parquet"))

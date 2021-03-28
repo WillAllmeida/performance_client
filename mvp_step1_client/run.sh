@@ -1,1 +1,1 @@
-./publish/mvp_step1_client
+./publish/mvp_step1_client $1 $2 $3 $4 $5 $6

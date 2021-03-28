@@ -12,10 +12,19 @@ Follow the install instructions from the link below:
 https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#2010-
 
 ## Building project
-Execute the setup and run scripts.
+Setup the project with following command:
 ```
 ./setup.sh
-./run.sh
+```
+
+## Running the Request Generator
+To see all the custom run options type the ``run.sh`` script with --help arg
+```
+./run.sh --help
+```
+Example running generator with default values for target and method args, but with a custom entries amount.
+```
+./run.sh --entries 50
 ```
 
 ps: execute the scripts above from the ``mvp_step1_client`` directory

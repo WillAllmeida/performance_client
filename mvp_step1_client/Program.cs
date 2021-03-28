@@ -82,14 +82,17 @@ namespace mvp_step1_client
                 }
             );
 
+            
             var rootCommand = new RootCommand
             {
                 methodOption,
                 targetOption,
-                entriesOption
+                entriesOption,
             };
 
+            rootCommand.Name = "run.sh";
             rootCommand.Description = "Generates a parquet file with CCF pre-serialized requests.";
+
             rootCommand.Handler = CommandHandler.Create<string, string, int>(WriteParquet);
 
             return rootCommand.InvokeAsync(args).Result;

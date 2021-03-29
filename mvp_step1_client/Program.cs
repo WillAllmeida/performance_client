@@ -1,14 +1,12 @@
-﻿using Parquet;
-using Parquet.Data;
+﻿using CCFPerformanceTester.Helper;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.IO;
-using System.Linq;
 
-namespace mvp_step1_client
+namespace CCFPerformanceTester.mvp_step1_client
 {
     class Program
     {
@@ -93,60 +91,48 @@ namespace mvp_step1_client
             rootCommand.Name = "run.sh";
             rootCommand.Description = "Generates a parquet file with CCF pre-serialized requests.";
 
-            rootCommand.Handler = CommandHandler.Create<string, string, int>(WriteParquet);
+            rootCommand.Handler = CommandHandler.Create<string, string, int>(GenerateRequestsParquet);
 
             return rootCommand.InvokeAsync(args).Result;
         }
 
-        private static void WriteParquet(string method, string target, int entries)
+        private static void GenerateRequestsParquet(string method, string target, int entries)
         {
-            List<int> requestIds = new List<int> { };
-            List<string> requestBodies = new List<string> { };
+            List<int> requestIds;
+            List<string> requestBodies;
 
+            Console.WriteLine("Starting pre-serialized requests");
+
+            GenerateRequestStrings(method, target, entries, out requestIds, out requestBodies);
+
+            string path = Directory.GetCurrentDirectory() + "/requests.parquet";
+
+            ParquetHelper.CreateParquetFile(requestIds, requestBodies, path);
+
+            Console.WriteLine("Requests were successfully generated");
+        }
+
+        private static void GenerateRequestStrings(string method, string target, int entries, out List<int> requestIds, out List<string> requestBodies)
+        {
+            requestIds = new List<int> { };
+            requestBodies = new List<string> { };
             for (int id = 0; id < entries; id++)
             {
                 requestIds.Add(id);
 
                 var requestContent = $"{{\"id\": {id}, \"msg\": \"MESSAGE {id}\"}}";
 
-                var requestText =
+                var requestString =
                     $"{method} {target} HTTP/1.1{Environment.NewLine}" +
                     $"Content-type: application/json{Environment.NewLine}" +
                     $"Content-Length: {requestContent.Length}{Environment.NewLine}" +
                     $"{Environment.NewLine}" +
                     requestContent;
 
-                requestBodies.Add(requestText);
+                requestBodies.Add(requestString);
             }
 
-            var indexColumn = new DataColumn(
-                new DataField<int>("Message ID"),
-                requestIds.ToArray());
-
-            var requestColumn = new DataColumn(
-               new DataField<string>("Serialized Request"),
-               requestBodies.ToArray());
-
-            
-            var schema = new Schema(indexColumn.Field, requestColumn.Field);
-
-            string path = Directory.GetCurrentDirectory();
-
-
-            using (Stream fileStream = File.Create(path + "/test.parquet"))
-            {
-                using (var parquetWriter = new ParquetWriter(schema, fileStream))
-                {
-                    
-                    using (ParquetRowGroupWriter groupWriter = parquetWriter.CreateRowGroup())
-                    {
-                        groupWriter.WriteColumn(indexColumn);
-                        groupWriter.WriteColumn(requestColumn);
-                    }
-                }
-            }
-
-            Console.WriteLine("Requests generated successfully");
+            Console.WriteLine("Generation of the request strings done");
         }
     }
 }

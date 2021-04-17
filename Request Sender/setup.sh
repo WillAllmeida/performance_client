@@ -1,0 +1,1 @@
+dotnet publish -c Release -o "./publish" -r linux-x64 --self-contained false

@@ -5,6 +5,8 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.IO;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace CCFPerformanceTester.mvp_step1_client
 {
@@ -80,7 +82,7 @@ namespace CCFPerformanceTester.mvp_step1_client
                 }
             );
 
-            
+
             var rootCommand = new RootCommand
             {
                 methodOption,
@@ -107,7 +109,7 @@ namespace CCFPerformanceTester.mvp_step1_client
 
             string path = Directory.GetCurrentDirectory() + "/requests.parquet";
 
-            ParquetHelper.CreateParquetFile(requestIds, requestBodies, path);
+            ParquetHelper.CreateRawRequestParquetFile(requestIds, requestBodies, path);
 
             Console.WriteLine("Requests were successfully generated");
         }
@@ -120,16 +122,27 @@ namespace CCFPerformanceTester.mvp_step1_client
             {
                 requestIds.Add(id);
 
-                var requestContent = $"{{\"id\": {id}, \"msg\": \"MESSAGE {id}\"}}";
+                var requestContent = new RequestFormat
+                {
+                    Content = new MessageContent
+                    {
+                        Id = id,
+                        Message = $"MESSAGE {id}"
+                    },
+                    Method = HttpMethod.Post,
+                    Path = target
+                };
 
-                var requestString =
-                    $"{method} {target} HTTP/1.1{Environment.NewLine}" +
-                    $"Content-type: application/json{Environment.NewLine}" +
-                    $"Content-Length: {requestContent.Length}{Environment.NewLine}" +
-                    $"{Environment.NewLine}" +
-                    requestContent;
+                //var requestContent = $"{{\"id\": {id}, \"msg\": \"MESSAGE {id}\"}}";
 
-                requestBodies.Add(requestString);
+                //var requestString =
+                //    $"{method} {target} HTTP/1.1{Environment.NewLine}" +
+                //    $"Content-type: application/json{Environment.NewLine}" +
+                //    $"Content-Length: {requestContent.Length}{Environment.NewLine}" +
+                //    $"{Environment.NewLine}" +
+                //    requestContent;
+
+                requestBodies.Add(JsonSerializer.Serialize(requestContent));
             }
 
             Console.WriteLine("Generation of the request strings done");

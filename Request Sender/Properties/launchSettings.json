@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Request Sender": {
+      "commandName": "Project",
+      "commandLineArgs": "https://localhost:44392"
+    }
+  }
+}

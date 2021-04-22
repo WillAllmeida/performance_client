@@ -24,11 +24,6 @@ namespace Request_Sender
 
         static async Task Main(string[] args)
         {
-
-          
-
-            
-
             var a = GetStringRequests();
 
             await SendAllRequests(a);
@@ -64,7 +59,7 @@ namespace Request_Sender
                 requestContent;
 
             var dic = new Dictionary<int, string> { };
-            for(int i = 0; i < 5000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 dic.Add(i, requestString);
             }
@@ -86,57 +81,53 @@ namespace Request_Sender
             return sslStream;
         }
 
-        private static async Task<KeyValuePair<int, SslStream>> SendStreamAsync(string requestString, int id, SslStream sslStream)
+        private static async Task<KeyValuePair<int, SslStream>> SendStreamAsync(Dictionary<int, string> requestsDictionary, SslStream sslStream)
         {
-            
+            var id = 1;
             var x = new KeyValuePair<int, SslStream>(id, sslStream);
             var b = new StringBuilder();
-            byte[] buffer = new byte[2048];
-            int bytes;
 
-            
 
-            byte[] request = Encoding.UTF8.GetBytes(requestString);
-            sslStream.Write(request, 0, request.Length);
-            Console.WriteLine($"Sent request {id}");
-            //sslStream.EndWrite(request);
-            await sslStream.FlushAsync();
-
-            
-
-            var sb = new StringBuilder();
-            do
+            foreach (var k in requestsDictionary.Keys)
             {
-                bytes = sslStream.Read(buffer, 0, buffer.Length);
-                //Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, bytes));
-                Console.WriteLine($"Received response {id}");
-            } while (bytes == 2048);
+                byte[] buffer = new byte[2048];
+                byte[] request = Encoding.UTF8.GetBytes(requestsDictionary[k]);
+                await sslStream.WriteAsync(request, 0, request.Length);
+                
 
-            
+                await sslStream.FlushAsync();
+            }
 
             return x;
         }
 
-        public static Dictionary<int, HttpRequestMessage> ConvertToHTTPRequestMessage(Dictionary<int, RequestFormat> stringDictionary, string baseURL)
+        private static async Task ReadResponsesContinuosly(SslStream sslStream, int expectedResponses)
         {
-            Dictionary<int, HttpRequestMessage> formattedRequests = new Dictionary<int, HttpRequestMessage>();
-
-            foreach (var k in stringDictionary.Keys)
+            Byte[] data = new Byte[2048];
+            String responseData = String.Empty;
+            Int32 bytes;
+            var i = 0;
+            
+            while (true)
             {
-                var requestMessage = new HttpRequestMessage
+                
+                bytes = await sslStream.ReadAsync(data, 0, data.Length);
+                if (bytes > 0)
                 {
-                    Version = HttpVersion.Version11,
-                    Method = stringDictionary[k].Method,
-                    RequestUri = new Uri(baseURL + stringDictionary[k].Path),
-                    Content = new StringContent(JsonSerializer.Serialize(stringDictionary[k].Content), Encoding.UTF8, "application/json")
-                };
+                    responseData = Encoding.ASCII.GetString(data, 0, bytes);
+                    
 
-                formattedRequests.Add(k, requestMessage);
+                    if(responseData.Length > 100)
+                        i += 1;
+
+                    if (i == expectedResponses)
+                        break;
+
+                }
+
             }
-
-            return formattedRequests;
-
         }
+
         private static async Task SendAllRequests(Dictionary<int, string> requestsDictionary)
         {
             var sslStream = await AuthenticateClient();
@@ -145,16 +136,16 @@ namespace Request_Sender
             var tasks = new List<Task<KeyValuePair<int, SslStream>>>();
 
             var sw = Stopwatch.StartNew();
-            foreach (var k in requestsDictionary.Keys)
-            {
 
-                tasks.Add(SendStreamAsync(requestsDictionary[k], k, sslStream));
-            }
+            var a = ReadResponsesContinuosly(sslStream, requestsDictionary.Count);
+            var b = SendStreamAsync(requestsDictionary, sslStream);
+
+            Console.WriteLine("Enviei todas");
+            await Task.WhenAll(a, b);
 
             sw.Stop();
-            Console.WriteLine("Enviei todas");
             Console.WriteLine(sw.ElapsedMilliseconds);
-            var requestsInfo = await Task.WhenAll(tasks);
+
 
             //var dict = new Dictionary<int, SslStream> { };
 
@@ -167,26 +158,6 @@ namespace Request_Sender
             //var a = readStreams.Values;
             //Console.WriteLine(string.Join("\n", a));
             //ParquetHelper.CreateRequestsParquetFile(requestsInfo, path);
-        }
-
-        private static async Task<Dictionary<int, string>> ReadAllStreamsAsync(Dictionary<int, SslStream> requestsDict)
-        {
-            var taskLists = new List<Task<KeyValuePair<int, string>>> { };
-            foreach(var (k, v) in requestsDict)
-            {
-                taskLists.Add(ReadSingleStreamAsync(k, v));
-            }
-
-            var result = await Task.WhenAll(taskLists);
-
-            var dict = new Dictionary<int, string> { };
-
-            foreach(var (k, v) in result)
-            {
-                dict.Add(k, v);
-            }
-
-            return dict;
         }
 
         private static async Task<KeyValuePair<int, string>> ReadSingleStreamAsync(int id, SslStream stream)
@@ -202,15 +173,5 @@ namespace Request_Sender
 
             return new KeyValuePair<int, string>(id, sb.ToString());
         }
-        //private static async Task<string> SendRequest(int messageId, HttpRequestMessage requestMessage)
-        //{
-        //    var response = await client.SendAsync(requestMessage);
-        //    var sendingTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
-        //    var responseContent = await response.Content.ReadAsStringAsync();
-        //    var responseTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
-        //    return $"{messageId}/{sendingTimestamp}/{responseTimestamp}/{responseContent}";
-        //}
     }
 }

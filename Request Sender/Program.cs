@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
@@ -51,7 +52,7 @@ namespace Request_Sender
             var requestContent = $@"{{""id"": {1}, ""msg"": ""MESSAGE {1}""}}";
 
             var requestString =
-                $"POST /Test/test HTTP/1.1{Environment.NewLine}" +
+                $"POST /app/log/private HTTP/1.1{Environment.NewLine}" +
                 $"Host: localhost{Environment.NewLine}" +
                 $"Content-type: application/json{Environment.NewLine}" +
                 $"Content-Length: {requestContent.Length}{Environment.NewLine}" +
@@ -69,16 +70,39 @@ namespace Request_Sender
         private static async Task<SslStream> AuthenticateClient()
         {
             var client = new TcpClient();
-            var ipAddress = Dns.GetHostEntry("localhost").AddressList[0];
 
-            await client.ConnectAsync("localhost", 44392);
+            
+            await client.ConnectAsync("127.0.0.1", 8000);
+
+            var serverCertificate = X509Certificate2.CreateFromPemFile("user0_cert.pem", "user0_privk.pem");
+            X509Certificate2Collection certificateCollection = new X509Certificate2Collection();
+            
+            certificateCollection.Add(serverCertificate);
+
+
+
             SslStream sslStream = new SslStream(
                 client.GetStream(),
                 false,
+                new RemoteCertificateValidationCallback (App_CertificateValidation),
                 null
             );
-            await sslStream.AuthenticateAsClientAsync("localhost");
+
+            await sslStream.AuthenticateAsClientAsync(
+            "127.0.0.1",
+            certificateCollection,
+            SslProtocols.Tls12,
+            true);
+
+
             return sslStream;
+        }
+
+        static bool App_CertificateValidation(Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            if (sslPolicyErrors == SslPolicyErrors.None) { return true; }
+            if (sslPolicyErrors == SslPolicyErrors.RemoteCertificateChainErrors) { return true; }
+            return false;
         }
 
         private static async Task<KeyValuePair<int, SslStream>> SendStreamAsync(Dictionary<int, string> requestsDictionary, SslStream sslStream)
@@ -93,7 +117,7 @@ namespace Request_Sender
                 byte[] buffer = new byte[2048];
                 byte[] request = Encoding.UTF8.GetBytes(requestsDictionary[k]);
                 await sslStream.WriteAsync(request, 0, request.Length);
-                
+
 
                 await sslStream.FlushAsync();
             }
@@ -107,17 +131,18 @@ namespace Request_Sender
             String responseData = String.Empty;
             Int32 bytes;
             var i = 0;
-            
+
             while (true)
             {
-                
+
                 bytes = await sslStream.ReadAsync(data, 0, data.Length);
                 if (bytes > 0)
                 {
                     responseData = Encoding.ASCII.GetString(data, 0, bytes);
-                    
 
-                    if(responseData.Length > 100)
+
+                    if (responseData.Length > 100)
+                        Console.WriteLine(responseData);
                         i += 1;
 
                     if (i == expectedResponses)

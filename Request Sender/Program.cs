@@ -53,14 +53,14 @@ namespace Request_Sender
 
             var requestString =
                 $"POST /app/log/private HTTP/1.1{Environment.NewLine}" +
-                $"Host: localhost{Environment.NewLine}" +
+                //$"Host: localhost{Environment.NewLine}" +
                 $"Content-type: application/json{Environment.NewLine}" +
                 $"Content-Length: {requestContent.Length}{Environment.NewLine}" +
                 $"{Environment.NewLine}" +
                 requestContent;
 
             var dic = new Dictionary<int, string> { };
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i <= 1000; i++)
             {
                 dic.Add(i, requestString);
             }
@@ -71,20 +71,25 @@ namespace Request_Sender
         {
             var client = new TcpClient();
 
-            
+            //var store =  new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+            //store.Open(OpenFlags.ReadWrite);
+
             await client.ConnectAsync("127.0.0.1", 8000);
 
             var serverCertificate = X509Certificate2.CreateFromPemFile("user0_cert.pem", "user0_privk.pem");
+            //var newtorkCertificate = new X509Certificate2("networkcert.pem");
+
             X509Certificate2Collection certificateCollection = new X509Certificate2Collection();
-            
+
             certificateCollection.Add(serverCertificate);
+            //certificateCollection.Add(newtorkCertificate);
 
-
+            //store.Add(newtorkCertificate);
 
             SslStream sslStream = new SslStream(
                 client.GetStream(),
                 false,
-                new RemoteCertificateValidationCallback (App_CertificateValidation),
+                new RemoteCertificateValidationCallback(App_CertificateValidation),
                 null
             );
 
@@ -105,30 +110,28 @@ namespace Request_Sender
             return false;
         }
 
-        private static async Task<KeyValuePair<int, SslStream>> SendStreamAsync(Dictionary<int, string> requestsDictionary, SslStream sslStream)
+        private static async Task<Dictionary<int, string>> SendStreamAsync(Dictionary<int, string> requestsDictionary, SslStream sslStream)
         {
-            var id = 1;
-            var x = new KeyValuePair<int, SslStream>(id, sslStream);
-            var b = new StringBuilder();
+            var sentRequestsDictionary = new Dictionary<int, string>();
 
 
             foreach (var k in requestsDictionary.Keys)
             {
-                byte[] buffer = new byte[2048];
                 byte[] request = Encoding.UTF8.GetBytes(requestsDictionary[k]);
                 await sslStream.WriteAsync(request, 0, request.Length);
-
+                var responseTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                sentRequestsDictionary.Add(k, responseTimestamp.ToString());
 
                 await sslStream.FlushAsync();
             }
 
-            return x;
+            return sentRequestsDictionary;
         }
 
-        private static async Task ReadResponsesContinuosly(SslStream sslStream, int expectedResponses)
+        private static async Task<Dictionary<int, ResponseOutput>> ReadResponsesContinuosly(SslStream sslStream, int expectedResponses)
         {
+            var responsesDictionary = new Dictionary<int, ResponseOutput> { };
             Byte[] data = new Byte[2048];
-            String responseData = String.Empty;
             Int32 bytes;
             var i = 0;
 
@@ -136,21 +139,33 @@ namespace Request_Sender
             {
 
                 bytes = await sslStream.ReadAsync(data, 0, data.Length);
+                var responseTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
                 if (bytes > 0)
                 {
-                    responseData = Encoding.ASCII.GetString(data, 0, bytes);
+                    string responseData = Encoding.ASCII.GetString(data, 0, bytes);
 
 
                     if (responseData.Length > 100)
-                        Console.WriteLine(responseData);
+                    {
+                        var requestOutput = new ResponseOutput()
+                        {
+                            ReceiveTime = responseTimestamp.ToString(),
+                            RawResponse = responseData
+                        };
+
+                        responsesDictionary.Add(i, requestOutput);
                         i += 1;
-
+                    }
                     if (i == expectedResponses)
+                    {
                         break;
-
+                    }
                 }
 
             }
+
+            return responsesDictionary;
         }
 
         private static async Task SendAllRequests(Dictionary<int, string> requestsDictionary)
@@ -158,45 +173,25 @@ namespace Request_Sender
             var sslStream = await AuthenticateClient();
 
             string path = Directory.GetCurrentDirectory();
-            var tasks = new List<Task<KeyValuePair<int, SslStream>>>();
 
             var sw = Stopwatch.StartNew();
 
-            var a = ReadResponsesContinuosly(sslStream, requestsDictionary.Count);
-            var b = SendStreamAsync(requestsDictionary, sslStream);
+            var readResponsesTask = ReadResponsesContinuosly(sslStream, requestsDictionary.Count);
+            var sendRequestsTask = SendStreamAsync(requestsDictionary, sslStream);
 
-            Console.WriteLine("Enviei todas");
-            await Task.WhenAll(a, b);
+            Console.WriteLine("Sent all the requests");
+            await Task.WhenAll(readResponsesTask, sendRequestsTask);
+
+            var responsesDictionary = readResponsesTask.Result;
+            var sentRequestsDictionary = sendRequestsTask.Result;
 
             sw.Stop();
             Console.WriteLine(sw.ElapsedMilliseconds);
 
-
-            //var dict = new Dictionary<int, SslStream> { };
-
-            //foreach (var (k, v) in requestsInfo)
-            //{
-            //    dict.Add(k, v);
-            //}
-
-            //var readStreams = await ReadAllStreamsAsync(dict);
-            //var a = readStreams.Values;
-            //Console.WriteLine(string.Join("\n", a));
-            //ParquetHelper.CreateRequestsParquetFile(requestsInfo, path);
+            Console.WriteLine("Creating parquet files");
+            ParquetHelper.CreateSentRequestsParquetFile(sentRequestsDictionary, path);
+            ParquetHelper.CreateRequestsResponseParquetFile(responsesDictionary, path);
         }
 
-        private static async Task<KeyValuePair<int, string>> ReadSingleStreamAsync(int id, SslStream stream)
-        {
-            byte[] buffer = new byte[2048];
-            int bytes;
-            var sb = new StringBuilder();
-            do
-            {
-                bytes = await stream.ReadAsync(buffer, 0, buffer.Length);
-                sb.Append(Encoding.UTF8.GetString(buffer, 0, bytes));
-            } while (bytes == 2048);
-
-            return new KeyValuePair<int, string>(id, sb.ToString());
-        }
     }
 }

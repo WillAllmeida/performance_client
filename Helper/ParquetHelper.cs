@@ -41,30 +41,20 @@ namespace CCFPerformanceTester.Helper
             }
         }
 
-        public static void CreateRequestsParquetFile(string[] requestsInfo, string path)
+        public static void CreateSentRequestsParquetFile(Dictionary<int, string> requestsDictionary, string path)
         {
-            var arrayLength = requestsInfo.Length;
+            var arrayLength = requestsDictionary.Count;
 
             int[] messageIDs = new int[arrayLength];
             string[] sendTime = new string[arrayLength];
-            string[] responseTime = new string[arrayLength];
-            string[] rawResponse = new string[arrayLength];
-
-            for (int i = 0; i < arrayLength; i++)
+            foreach (var k in requestsDictionary.Keys)
             {
-                string[] splittedRequest = requestsInfo[i].Split("/");
-                messageIDs[i] = Convert.ToInt32(splittedRequest[0]);
-                sendTime[i] = splittedRequest[1];
-                responseTime[i] = splittedRequest[2];
-                rawResponse[i] = splittedRequest[3];
+                messageIDs[k] = k;
+                sendTime[k] = requestsDictionary[k];
             }
-            CreateSentRequestsParquetFile(messageIDs, sendTime, path);
-            CreateRequestsResponseParquetFile(messageIDs, responseTime, rawResponse, path);
-        }
 
-        private static void CreateSentRequestsParquetFile(int[] messageIDs, string[] sendTime, string path)
-        {
             path = path + "/sentrequests.parquet";
+
             var indexColumn = new DataColumn(
                             new DataField<int>("Message ID"),
                             messageIDs);
@@ -93,8 +83,21 @@ namespace CCFPerformanceTester.Helper
             }
         }
 
-        private static void CreateRequestsResponseParquetFile(int[] messageIDs, string[] sendTime, string[] rawResponse, string path)
+        public static void CreateRequestsResponseParquetFile(Dictionary<int, ResponseOutput> responsesDictionary, string path)
         {
+            var arrayLength = responsesDictionary.Count;
+
+            int[] messageIDs = new int[arrayLength];
+            string[] responseTime = new string[arrayLength];
+            string[] rawResponse = new string[arrayLength];
+
+            foreach (var k in responsesDictionary.Keys)
+            {
+                messageIDs[k] = k;
+                responseTime[k] = responsesDictionary[k].ReceiveTime;
+                rawResponse[k] = responsesDictionary[k].RawResponse;
+            }
+
             path = path + "/responserequests.parquet";
 
             var indexColumn = new DataColumn(
@@ -103,8 +106,8 @@ namespace CCFPerformanceTester.Helper
 
             var responseTimeColumn = new DataColumn(
                new DataField<string>("Receive Time"),
-               sendTime);
-            
+               responseTime);
+
             var responseContentColumn = new DataColumn(
                new DataField<string>("Raw Response"),
                rawResponse);
@@ -129,9 +132,9 @@ namespace CCFPerformanceTester.Helper
             }
         }
 
-        public static Dictionary<int, RequestFormat> ReadParquetFile()
+        public static Dictionary<int, ResponseOutput> ReadParquetFile()
         {
-            Dictionary<int, RequestFormat> serializedRequests = new Dictionary<int, RequestFormat>();
+            Dictionary<int, ResponseOutput> serializedRequests = new Dictionary<int, ResponseOutput>();
 
             string path = Directory.GetCurrentDirectory() + "/../../../../mvp_step1_client/requests.parquet";
 
@@ -154,7 +157,7 @@ namespace CCFPerformanceTester.Helper
                         {
                             var convertedRequestData = (string)requestData.GetValue(j);
                             var convertedIdData = (int)idData.GetValue(j);
-                            serializedRequests.Add(convertedIdData, JsonSerializer.Deserialize<RequestFormat>(convertedRequestData));
+                            serializedRequests.Add(convertedIdData, JsonSerializer.Deserialize<ResponseOutput>(convertedRequestData));
                         }
 
                     }

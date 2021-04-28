@@ -28,23 +28,8 @@ namespace Request_Sender
             var a = GetStringRequests();
 
             await SendAllRequests(a);
-            //string postDataAsString = requestString;
-
-            //byte[] postDataBinary = Encoding.UTF8.GetBytes(postDataAsString);
-
-            //// make post request
-            //client.Client.Send(postDataBinary);
-
-            //// get response
-            //byte[] bytes = new byte[2048];
-            //int lengthOfResponse = client.Client.Receive(bytes);
-
-            //var resp = System.Text.Encoding.UTF8.GetString(bytes, 0, lengthOfResponse);
-            //client.BaseAddress = new Uri("https://localhost:44392/Test/test");
-            //var serializedRequests = ParquetHelper.ReadParquetFile();
 
             //var requestMessages = ConvertToHTTPRequestMessage(serializedRequests, args[0]);
-            //await SendAllRequests(requestMessages);
         }
 
         private static Dictionary<int, string> GetStringRequests()
@@ -53,7 +38,6 @@ namespace Request_Sender
 
             var requestString =
                 $"POST /app/log/private HTTP/1.1{Environment.NewLine}" +
-                //$"Host: localhost{Environment.NewLine}" +
                 $"Content-type: application/json{Environment.NewLine}" +
                 $"Content-Length: {requestContent.Length}{Environment.NewLine}" +
                 $"{Environment.NewLine}" +
@@ -71,7 +55,7 @@ namespace Request_Sender
         {
             var client = new TcpClient();
 
-            //var store =  new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+            //var store =  new X509Store(StoreName.My, StoreLocation.CurrentUser);
             //store.Open(OpenFlags.ReadWrite);
 
             await client.ConnectAsync("127.0.0.1", 8000);

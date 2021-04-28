@@ -107,7 +107,7 @@ namespace CCFPerformanceTester.mvp_step1_client
 
             GenerateRequestStrings(method, target, entries, out requestIds, out requestBodies);
 
-            string path = Directory.GetCurrentDirectory() + "/requests.parquet";
+            string path = Directory.GetCurrentDirectory() + "/../results/requests.parquet";
 
             ParquetHelper.CreateRawRequestParquetFile(requestIds, requestBodies, path);
 
@@ -122,27 +122,16 @@ namespace CCFPerformanceTester.mvp_step1_client
             {
                 requestIds.Add(id);
 
-                var requestContent = new RequestFormat
-                {
-                    Content = new MessageContent
-                    {
-                        Id = id,
-                        Message = $"MESSAGE {id}"
-                    },
-                    Method = HttpMethod.Post,
-                    Path = target
-                };
+                var requestContent = $"{{\"id\": {id}, \"msg\": \"MESSAGE {id}\"}}";
 
-                //var requestContent = $"{{\"id\": {id}, \"msg\": \"MESSAGE {id}\"}}";
+                var requestString =
+                    $"{method} {target} HTTP/1.1{Environment.NewLine}" +
+                    $"Content-type: application/json{Environment.NewLine}" +
+                    $"Content-Length: {requestContent.Length}{Environment.NewLine}" +
+                    $"{Environment.NewLine}" +
+                    requestContent;
 
-                //var requestString =
-                //    $"{method} {target} HTTP/1.1{Environment.NewLine}" +
-                //    $"Content-type: application/json{Environment.NewLine}" +
-                //    $"Content-Length: {requestContent.Length}{Environment.NewLine}" +
-                //    $"{Environment.NewLine}" +
-                //    requestContent;
-
-                requestBodies.Add(JsonSerializer.Serialize(requestContent));
+                requestBodies.Add(JsonSerializer.Serialize(requestString));
             }
 
             Console.WriteLine("Generation of the request strings done");

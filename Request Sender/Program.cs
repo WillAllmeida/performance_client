@@ -19,56 +19,38 @@ namespace Request_Sender
     class Program
     {
 
-        public static string url = "https://localhost:5001/Test/test";
-        //public static HttpClient client = new HttpClient();
         public static TcpClient client = new TcpClient();
 
         static async Task Main(string[] args)
         {
-            var a = GetStringRequests();
+            var requestMessages = ParquetHelper.ReadParquetFile();
 
-            await SendAllRequests(a);
+            await SendAllRequests(requestMessages, args[1], args[3], args[5], args[7]);
 
-            //var requestMessages = ConvertToHTTPRequestMessage(serializedRequests, args[0]);
         }
 
-        private static Dictionary<int, string> GetStringRequests()
-        {
-            var requestContent = $@"{{""id"": {1}, ""msg"": ""MESSAGE {1}""}}";
-
-            var requestString =
-                $"POST /app/log/private HTTP/1.1{Environment.NewLine}" +
-                $"Content-type: application/json{Environment.NewLine}" +
-                $"Content-Length: {requestContent.Length}{Environment.NewLine}" +
-                $"{Environment.NewLine}" +
-                requestContent;
-
-            var dic = new Dictionary<int, string> { };
-            for (int i = 0; i <= 1000; i++)
-            {
-                dic.Add(i, requestString);
-            }
-            return dic;
-        }
-
-        private static async Task<SslStream> AuthenticateClient()
+        private static async Task<SslStream> AuthenticateClient(string host, string userCert, string userPK, string CAcert)
         {
             var client = new TcpClient();
 
-            //var store =  new X509Store(StoreName.My, StoreLocation.CurrentUser);
-            //store.Open(OpenFlags.ReadWrite);
+            var hostData = host.Split(':', 2);
 
-            await client.ConnectAsync("127.0.0.1", 8000);
 
-            var serverCertificate = X509Certificate2.CreateFromPemFile("user0_cert.pem", "user0_privk.pem");
-            //var newtorkCertificate = new X509Certificate2("networkcert.pem");
+            var store =  new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadWrite);
+
+            await client.ConnectAsync(hostData[0], Convert.ToInt32(hostData[1]));
+
+            var serverCertificate = X509Certificate2.CreateFromPemFile(userCert, userPK);
+            var newtorkCertificate = new X509Certificate2(CAcert);
 
             X509Certificate2Collection certificateCollection = new X509Certificate2Collection();
 
             certificateCollection.Add(serverCertificate);
-            //certificateCollection.Add(newtorkCertificate);
+            certificateCollection.Add(newtorkCertificate);
 
-            //store.Add(newtorkCertificate);
+            store.Add(newtorkCertificate);
+            store.Close();
 
             SslStream sslStream = new SslStream(
                 client.GetStream(),
@@ -78,7 +60,7 @@ namespace Request_Sender
             );
 
             await sslStream.AuthenticateAsClientAsync(
-            "127.0.0.1",
+            hostData[0],
             certificateCollection,
             SslProtocols.Tls12,
             true);
@@ -152,13 +134,11 @@ namespace Request_Sender
             return responsesDictionary;
         }
 
-        private static async Task SendAllRequests(Dictionary<int, string> requestsDictionary)
+        private static async Task SendAllRequests(Dictionary<int, string> requestsDictionary, string host, string userCert, string userPK, string CAcert)
         {
-            var sslStream = await AuthenticateClient();
+            var sslStream = await AuthenticateClient(host, userCert, userPK, CAcert);
 
             string path = Directory.GetCurrentDirectory();
-
-            var sw = Stopwatch.StartNew();
 
             var readResponsesTask = ReadResponsesContinuosly(sslStream, requestsDictionary.Count);
             var sendRequestsTask = SendStreamAsync(requestsDictionary, sslStream);
@@ -169,8 +149,6 @@ namespace Request_Sender
             var responsesDictionary = readResponsesTask.Result;
             var sentRequestsDictionary = sendRequestsTask.Result;
 
-            sw.Stop();
-            Console.WriteLine(sw.ElapsedMilliseconds);
 
             Console.WriteLine("Creating parquet files");
             ParquetHelper.CreateSentRequestsParquetFile(sentRequestsDictionary, path);

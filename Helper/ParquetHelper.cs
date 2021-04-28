@@ -53,7 +53,7 @@ namespace CCFPerformanceTester.Helper
                 sendTime[k] = requestsDictionary[k];
             }
 
-            path = path + "/sentrequests.parquet";
+            path = path + "/../results/sentrequests.parquet";
 
             var indexColumn = new DataColumn(
                             new DataField<int>("Message ID"),
@@ -98,7 +98,7 @@ namespace CCFPerformanceTester.Helper
                 rawResponse[k] = responsesDictionary[k].RawResponse;
             }
 
-            path = path + "/responserequests.parquet";
+            path = path + "/../results/responserequests.parquet";
 
             var indexColumn = new DataColumn(
                             new DataField<int>("Message ID"),
@@ -132,11 +132,11 @@ namespace CCFPerformanceTester.Helper
             }
         }
 
-        public static Dictionary<int, ResponseOutput> ReadParquetFile()
+        public static Dictionary<int, string> ReadParquetFile()
         {
-            Dictionary<int, ResponseOutput> serializedRequests = new Dictionary<int, ResponseOutput>();
+            Dictionary<int, string> serializedRequests = new Dictionary<int, string>();
 
-            string path = Directory.GetCurrentDirectory() + "/../../../../mvp_step1_client/requests.parquet";
+            string path = Directory.GetCurrentDirectory() + "/../../new_perf_client/results/requests.parquet";
 
             using (Stream fileStream = File.OpenRead(path))
             {
@@ -157,7 +157,7 @@ namespace CCFPerformanceTester.Helper
                         {
                             var convertedRequestData = (string)requestData.GetValue(j);
                             var convertedIdData = (int)idData.GetValue(j);
-                            serializedRequests.Add(convertedIdData, JsonSerializer.Deserialize<ResponseOutput>(convertedRequestData));
+                            serializedRequests.Add(convertedIdData, convertedRequestData);
                         }
 
                     }

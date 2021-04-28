@@ -29,6 +29,18 @@ Example running generator with default values for target and method args, but wi
 
 ps: execute the scripts above from the ``mvp_step1_client`` directory
 
-## Result
+### Result
 
-The output will be in the file "test.parquet" inside ``mvp_step1_client`` folder
+The output will be in the file "requests.parquet" inside ``results`` folder
+
+## Running the Request Sender
+Example running request sender
+```
+./run.sh --host 127.0.0.1:8000 --user user0_cert.pem --pk user0_privk.pem --cacert networkcert.pem
+```
+
+ps: execute the scripts above from the ``Request Sender`` directory
+
+### Result
+
+The output will be in the files "responserequests.parquet" and "sentrequests.parquet" inside ``results`` folder

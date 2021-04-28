@@ -131,7 +131,7 @@ namespace CCFPerformanceTester.mvp_step1_client
                     $"{Environment.NewLine}" +
                     requestContent;
 
-                requestBodies.Add(JsonSerializer.Serialize(requestString));
+                requestBodies.Add(requestString);
             }
 
             Console.WriteLine("Generation of the request strings done");

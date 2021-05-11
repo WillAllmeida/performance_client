@@ -136,7 +136,7 @@ namespace CCFPerformanceTester.Helper
         {
             Dictionary<int, string> serializedRequests = new Dictionary<int, string>();
 
-            string path = Directory.GetCurrentDirectory() + "/../../new_perf_client/results/requests.parquet";
+            string path = Directory.GetCurrentDirectory() + "/../results/requests.parquet";
 
             using (Stream fileStream = File.OpenRead(path))
             {

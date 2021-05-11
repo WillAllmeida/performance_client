@@ -3,13 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mvp_step1_client", "mvp_step1_client\mvp_step1_client.csproj", "{9E15482C-3A65-45AF-B907-2A491318F07A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Generator", "Generator\Generator.csproj", "{9E15482C-3A65-45AF-B907-2A491318F07A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helper", "Helper\Helper.csproj", "{8A905B7F-5575-468D-B8D6-86C3706E23BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Request Sender", "Request Sender\Request Sender.csproj", "{A24879EC-9035-4C74-9BFA-F646DF31D6A4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Endpoint Mocker", "Endpoint Mocker\Endpoint Mocker.csproj", "{ABA5A614-1764-47FD-BEEE-EE7F14D47F88}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sender", "Sender\Sender.csproj", "{A24879EC-9035-4C74-9BFA-F646DF31D6A4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +27,6 @@ Global
 		{A24879EC-9035-4C74-9BFA-F646DF31D6A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A24879EC-9035-4C74-9BFA-F646DF31D6A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A24879EC-9035-4C74-9BFA-F646DF31D6A4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ABA5A614-1764-47FD-BEEE-EE7F14D47F88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ABA5A614-1764-47FD-BEEE-EE7F14D47F88}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ABA5A614-1764-47FD-BEEE-EE7F14D47F88}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ABA5A614-1764-47FD-BEEE-EE7F14D47F88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

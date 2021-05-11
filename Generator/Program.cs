@@ -8,7 +8,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 
-namespace CCFPerformanceTester.mvp_step1_client
+namespace CCFPerformanceTester.Generator
 {
     class Program
     {

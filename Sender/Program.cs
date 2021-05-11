@@ -14,7 +14,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Request_Sender
+namespace Sender
 {
     class Program
     {

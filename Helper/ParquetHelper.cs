@@ -23,22 +23,7 @@ namespace CCFPerformanceTester.Helper
 
             List<DataColumn> schemaColumns = new List<DataColumn>() { indexColumn, requestColumn };
 
-            var schema = new Schema(schemaColumns.ConvertAll(col => col.Field));
-
-            using (Stream fileStream = File.Create(path))
-            {
-                using (var parquetWriter = new ParquetWriter(schema, fileStream))
-                {
-
-                    using (ParquetRowGroupWriter groupWriter = parquetWriter.CreateRowGroup())
-                    {
-                        foreach (var column in schemaColumns)
-                        {
-                            groupWriter.WriteColumn(column);
-                        }
-                    }
-                }
-            }
+            WriteDataInFile(path, schemaColumns);
         }
 
         public static void CreateSentRequestsParquetFile(Dictionary<int, string> requestsDictionary, string path)
@@ -65,6 +50,11 @@ namespace CCFPerformanceTester.Helper
 
             List<DataColumn> schemaColumns = new List<DataColumn>() { indexColumn, sendTimeColumn };
 
+            WriteDataInFile(path, schemaColumns);
+        }
+
+        private static void WriteDataInFile(string path, List<DataColumn> schemaColumns)
+        {
             var schema = new Schema(schemaColumns.ConvertAll(col => col.Field));
 
             using (Stream fileStream = File.Create(path))
@@ -114,22 +104,7 @@ namespace CCFPerformanceTester.Helper
 
             List<DataColumn> schemaColumns = new List<DataColumn>() { indexColumn, responseTimeColumn, responseContentColumn };
 
-            var schema = new Schema(schemaColumns.ConvertAll(col => col.Field));
-
-            using (Stream fileStream = File.Create(path))
-            {
-                using (var parquetWriter = new ParquetWriter(schema, fileStream))
-                {
-
-                    using (ParquetRowGroupWriter groupWriter = parquetWriter.CreateRowGroup())
-                    {
-                        foreach (var column in schemaColumns)
-                        {
-                            groupWriter.WriteColumn(column);
-                        }
-                    }
-                }
-            }
+            WriteDataInFile(path, schemaColumns);
         }
 
         public static Dictionary<int, string> ReadParquetFile()

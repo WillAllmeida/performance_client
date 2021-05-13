@@ -1,6 +1,9 @@
 ﻿using CCFPerformanceTester.Helper;
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -21,12 +24,36 @@ namespace Sender
 
         public static TcpClient client = new TcpClient();
 
-        static async Task Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
-            var requestMessages = ParquetHelper.ReadParquetFile();
+            Option<string> hostOption, userOption, userPkOption, caCertOption, infileOption, requestsFileOption, responsesFileOption;
 
-            await SendAllRequests(requestMessages, args[1], args[3], args[5], args[7]);
+            CommandLineHelper.CreateSenderCommandOptions(out hostOption, out userOption, out userPkOption, out caCertOption, out infileOption, out requestsFileOption, out responsesFileOption);
 
+            var rootCommand = new RootCommand
+            {
+                hostOption,
+                userOption,
+                userPkOption,
+                caCertOption,
+                infileOption,
+                requestsFileOption,
+                responsesFileOption,
+            };
+
+            rootCommand.Name = "run.sh";
+            rootCommand.Description = "Send requests generated requests to a specified CCF node.";
+
+            rootCommand.Handler = CommandHandler.Create<string, string, string, string, string, string, string>(StartRequestsSending);
+
+            return rootCommand.InvokeAsync(args).Result;
+        }
+
+        private static async Task StartRequestsSending(string host, string user, string pk, string caCert, string infile, string requestsFile, string responsesFile)
+        {
+            var requestMessages = ParquetHelper.ReadParquetFile(infile);
+
+            await SendAllRequests(requestMessages, host, user, pk, caCert, requestsFile, responsesFile);
         }
 
         private static async Task<SslStream> AuthenticateClient(string host, string userCert, string userPK, string CAcert)
@@ -134,7 +161,7 @@ namespace Sender
             return responsesDictionary;
         }
 
-        private static async Task SendAllRequests(Dictionary<int, string> requestsDictionary, string host, string userCert, string userPK, string CAcert)
+        private static async Task SendAllRequests(Dictionary<int, string> requestsDictionary, string host, string userCert, string userPK, string CAcert, string requestsFile, string responsesFile)
         {
             var sslStream = await AuthenticateClient(host, userCert, userPK, CAcert);
 
@@ -151,8 +178,8 @@ namespace Sender
 
 
             Console.WriteLine("Creating parquet files");
-            ParquetHelper.CreateSentRequestsParquetFile(sentRequestsDictionary, path);
-            ParquetHelper.CreateRequestsResponseParquetFile(responsesDictionary, path);
+            ParquetHelper.CreateSentRequestsParquetFile(sentRequestsDictionary, path, requestsFile);
+            ParquetHelper.CreateRequestsResponseParquetFile(responsesDictionary, path, responsesFile);
         }
 
     }

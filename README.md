@@ -50,6 +50,11 @@ Setup the sender with following command:
 ```
 
 ## Running the Request Sender
+To see all the custom run options type the ``run.sh`` script with --help arg
+```
+./run.sh --help
+```
+
 Example running request sender
 ```
 ./run.sh --host 127.0.0.1:8000 --user user0_cert.pem --pk user0_privk.pem --cacert networkcert.pem

@@ -14,74 +14,10 @@ namespace CCFPerformanceTester.Generator
     {
         static int Main(string[] args)
         {
-            var methodOption = new Option<string>(
-                                   alias: "--method",
-                                   getDefaultValue: () => "POST",
-                                   description: "HTTP request method, set of options: [POST, GET, DELETE]");
+            Option<string> methodOption, targetOption;
+            Option<int> entriesOption;
 
-            methodOption.AddValidator(
-                cmd =>
-                {
-                    List<string> availableMethods = new List<string> { "POST", "GET", "DELETE" };
-
-                    var methodValue = (string)cmd.GetValueOrDefault();
-
-                    if (!availableMethods.Exists(m => m.Equals(methodValue)))
-                    {
-                        return "Invalid value to method option, type --help to see the options";
-                    }
-                    else
-                    {
-                        return null;
-                    }
-
-                }
-            );
-
-            var targetOption = new Option<string>(
-                                   alias: "--target",
-                                   getDefaultValue: () => "/app/log/private",
-                                   description: "Target which will receive the requests");
-
-            targetOption.AddValidator(
-                cmd =>
-                {
-                    var targetValue = (string)cmd.GetValueOrDefault();
-
-                    if (!targetValue.StartsWith("/"))
-                    {
-                        return "Invalid value to target argument, check the written path";
-                    }
-                    else
-                    {
-                        return null;
-                    }
-
-                }
-            );
-
-            var entriesOption = new Option<int>(
-                                   alias: "--entries",
-                                   getDefaultValue: () => 100,
-                                   description: "How many requests will be generated");
-
-            entriesOption.AddValidator(
-                cmd =>
-                {
-                    var entriesValue = (int)cmd.GetValueOrDefault();
-
-                    if (entriesValue < 1)
-                    {
-                        return "Invalid value to entries argument, check if inserted value is correct";
-                    }
-                    else
-                    {
-                        return null;
-                    }
-
-                }
-            );
-
+            CommandLineHelper.CreateGeneratorCommandOptions(out methodOption, out targetOption, out entriesOption);
 
             var rootCommand = new RootCommand
             {
@@ -97,6 +33,7 @@ namespace CCFPerformanceTester.Generator
 
             return rootCommand.InvokeAsync(args).Result;
         }
+
 
         private static void GenerateRequestsParquet(string method, string target, int entries)
         {

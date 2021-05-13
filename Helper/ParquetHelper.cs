@@ -26,7 +26,7 @@ namespace CCFPerformanceTester.Helper
             WriteDataInFile(path, schemaColumns);
         }
 
-        public static void CreateSentRequestsParquetFile(Dictionary<int, string> requestsDictionary, string path)
+        public static void CreateSentRequestsParquetFile(Dictionary<int, string> requestsDictionary, string path, string relativePath)
         {
             var arrayLength = requestsDictionary.Count;
 
@@ -38,7 +38,7 @@ namespace CCFPerformanceTester.Helper
                 sendTime[k] = requestsDictionary[k];
             }
 
-            path = path + "/../results/sentrequests.parquet";
+            path = path + relativePath;
 
             var indexColumn = new DataColumn(
                             new DataField<int>("Message ID"),
@@ -73,7 +73,7 @@ namespace CCFPerformanceTester.Helper
             }
         }
 
-        public static void CreateRequestsResponseParquetFile(Dictionary<int, ResponseOutput> responsesDictionary, string path)
+        public static void CreateRequestsResponseParquetFile(Dictionary<int, ResponseOutput> responsesDictionary, string path, string relativePath)
         {
             var arrayLength = responsesDictionary.Count;
 
@@ -88,7 +88,7 @@ namespace CCFPerformanceTester.Helper
                 rawResponse[k] = responsesDictionary[k].RawResponse;
             }
 
-            path = path + "/../results/responserequests.parquet";
+            path = path + relativePath;
 
             var indexColumn = new DataColumn(
                             new DataField<int>("Message ID"),
@@ -107,11 +107,11 @@ namespace CCFPerformanceTester.Helper
             WriteDataInFile(path, schemaColumns);
         }
 
-        public static Dictionary<int, string> ReadParquetFile()
+        public static Dictionary<int, string> ReadParquetFile(string infile)
         {
             Dictionary<int, string> serializedRequests = new Dictionary<int, string>();
 
-            string path = Directory.GetCurrentDirectory() + "/../results/requests.parquet";
+            string path = Directory.GetCurrentDirectory() + infile;
 
             using (Stream fileStream = File.OpenRead(path))
             {

@@ -108,8 +108,7 @@ namespace CCFPerformanceTester.Helper
             responsesFileOption = new Option<string>(
                                    alias: "--responsesfile",
                                    getDefaultValue: () => "/../results/responses.parquet",
-                                   description: "Path to Parquet with responses data")
-            { Argument = new Argument<string>() };
+                                   description: "Path to Parquet with responses data");
         }
     }
 }

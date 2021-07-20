@@ -12,7 +12,7 @@ https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#2010-
 
 Go to the step1 MVP folder
 ```
-cd mvp_step1_client/
+cd Generator/
 ```
 
 ## Building generator
@@ -31,7 +31,7 @@ Example running generator with default values for target and method args, but wi
 ./run.sh --entries 50
 ```
 
-ps: execute the scripts above from the ``mvp_step1_client`` directory
+ps: execute the scripts above from the ``Generator`` directory
 
 ### Result
 
@@ -40,7 +40,7 @@ The output will be in the file "requests.parquet" inside ``results`` folder
 # Request Sender
 Go to the Request Sender MVP folder
 ```
-cd Request\ Sender/
+cd Sender
 ```
 
 ## Building sender
@@ -60,8 +60,36 @@ Example running request sender
 ./run.sh --host 127.0.0.1:8000 --user user0_cert.pem --pk user0_privk.pem --cacert networkcert.pem
 ```
 
-ps: execute the scripts above from the ``Request Sender`` directory
+ps: execute the scripts above from the ``Sender`` directory
 
 ### Result
 
-The output will be in the files "responserequests.parquet" and "sentrequests.parquet" inside ``results`` folder
+The output will be in the files "responses.parquet" and "sentrequests.parquet" inside ``results`` folder
+
+# Analyzer
+
+Go to the Request Sender MVP folder
+```
+cd Analyzer
+```
+
+## Installing Analyzer requirements
+Setup the analyzer with following command:
+```
+pip3 install -r requirements.txt
+```
+
+## Running Analyzer
+Example
+```
+python3 main.py
+```
+
+ps: execute the scripts above from the ``Analyzer`` directory
+
+### Result
+
+The output will be in command line
+
+ps: the input files need to be inside ``results`` folder
+

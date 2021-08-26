@@ -10,7 +10,7 @@ https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#2010-
 
 # Request Generator
 
-Go to the step1 MVP folder
+Go to the Generator folder
 ```
 cd Generator/
 ```
@@ -38,7 +38,7 @@ ps: execute the scripts above from the ``Generator`` directory
 The output will be in the file "requests.parquet" inside ``results`` folder
 
 # Request Sender
-Go to the Request Sender MVP folder
+Go to the Sender folder
 ```
 cd Sender
 ```
@@ -68,7 +68,7 @@ The output will be in the files "responses.parquet" and "sentrequests.parquet" i
 
 # Analyzer
 
-Go to the Request Sender MVP folder
+Go to the Analyzer folder
 ```
 cd Analyzer
 ```

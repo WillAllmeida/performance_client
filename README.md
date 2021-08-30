@@ -15,7 +15,7 @@ Go to the Generator folder
 cd Generator/
 ```
 
-## Building generator
+## Building Generator
 Setup the generator with following command:
 ```
 ./setup.sh
@@ -43,7 +43,7 @@ Go to the Sender folder
 cd Sender
 ```
 
-## Building sender
+## Building Sender
 Setup the sender with following command:
 ```
 ./setup.sh
@@ -74,15 +74,19 @@ cd Analyzer
 ```
 
 ## Installing Analyzer requirements
-Setup the analyzer with following command:
+Install the analyzer lib requirements with the setup script:
 ```
-pip3 install -r requirements.txt
+./setup.sh
 ```
 
 ## Running Analyzer
-Example
+To see all the custom run options type the ``run.sh`` script with --help arg
 ```
-python3 main.py
+./run.sh --help
+```
+Example running the analyzer script
+```
+./run.sh --responsesfile /../results/responses.parquet
 ```
 
 ps: execute the scripts above from the ``Analyzer`` directory
@@ -91,5 +95,5 @@ ps: execute the scripts above from the ``Analyzer`` directory
 
 The output will be in command line
 
-ps: the input files need to be inside ``results`` folder
+ps: the input files with default params need to be inside ``results`` folder
 

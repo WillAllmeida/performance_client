@@ -1,13 +1,18 @@
 import datetime
-import helper
+import helper as h
 from measure import Measure
 from sys import getsizeof
+from termcolor import colored
+from pyfiglet import Figlet
 
 
 if __name__ == "__main__":
-    result_df = helper.load_input_files()
-
+    # Initial Configuration
+    result_df = h.load_input_files()
+    color = 'cyan'
     measure = Measure(result_df)
+    f = Figlet(font='slant')
+    print(f.renderText('Performance Test'))
 
     bytes_received = measure.sum_bytes_count('Raw Response')
     bytes_sended = measure.sum_bytes_count('Serialized Request')
@@ -23,11 +28,35 @@ if __name__ == "__main__":
 
     success_rate = measure.calculate_success_rate()
 
-    print('{}s of elapsed sending time'.format(total_sending_time))
-    print('{}s of elapsed receiving time'.format(total_receiving_time))
-    print('{}s of test duration'.format(test_duration))
-    print('{} Bytes sended'.format(bytes_sended))
-    print('{} Bytes received'.format(bytes_received))
-    print('Latencies [min, max, mean]   {}s, {}s, {}s'.format(result_df['Latencies'].min(), result_df['Latencies'].max(), result_df['Latencies'].mean()))
-    print('Requests [count, rate(Requests/s), throughput(Bytes/s)]   {}, {}, {}'.format(len(result_df.index), rate, throughput))
-    print('{}% Success rate'.format(success_rate))
+    print('{} {}s'.format(h.format_result_index('Elapsed sending time'),
+                          colored(total_sending_time, color)
+                          ))
+    print('{} {}s'.format(h.format_result_index('Elapsed receiving time'),
+                          colored(total_receiving_time, color)
+                          ))
+    print('{} {}s'.format(h.format_result_index('Test duration'),
+                          colored(test_duration, color)
+                          ))
+    print('{} {} MB'.format(h.format_result_index('Bytes sended'),
+                            colored(round(bytes_sended, 3), color)
+                            ))
+    print('{} {} MB'.format(h.format_result_index('Bytes received'),
+                            colored(round(bytes_received, 3), color)
+                            ))
+    print("""{} """
+          """{}s, {}s, {}s"""
+          .format(h.format_result_index('Latencies [min, max, mean]'),
+                  colored(result_df['Latencies'].min(), color),
+                  colored(result_df['Latencies'].max(), color),
+                  colored(round(result_df['Latencies'].mean(), 3), color)
+                  ))
+    print("""{} """
+          """{}, {}R/s, {} MB/s"""
+          .format(h.format_result_index('Requests [count, rate, throughput]'),
+                  colored(measure.requests_count, color),
+                  colored(round(rate, 3), color),
+                  colored(round(throughput, 3), color)
+                  ))
+    print('{} {}% '.format(h.format_result_index('Success rate'),
+                           colored(success_rate, color)
+                           ))

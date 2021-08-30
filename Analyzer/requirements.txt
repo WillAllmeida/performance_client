@@ -1,2 +1,4 @@
 pyarrow
 pandas
+termcolor
+pyfiglet

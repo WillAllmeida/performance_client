@@ -2,15 +2,19 @@ import pyarrow.parquet as pq
 
 
 def load_input_files():
-    requests_df = pq.read_table("../results/requests.parquet",
+    requests_file = "../results/requests.parquet"
+    sentrequests_file = "../results/sentrequests.parquet"
+    responses_file = "../results/responses.parquet"
+
+    requests_df = pq.read_table(requests_file,
                                 columns=['Message ID',
                                          'Serialized Request'
                                          ]
                                 ).to_pandas()
-    sentrequests_df = pq.read_table("../results/sentrequests.parquet",
+    sentrequests_df = pq.read_table(sentrequests_file,
                                     columns=['Message ID', 'Send Time']
                                     ).to_pandas()
-    responses_df = pq.read_table("../results/responses.parquet",
+    responses_df = pq.read_table(responses_file,
                                  columns=['Message ID',
                                           'Receive Time',
                                           'Raw Response'
@@ -19,7 +23,10 @@ def load_input_files():
 
     return (requests_df.merge(sentrequests_df, on='Message ID'
                               )
-                       .merge(responses_df, on='Message ID'))
+                       .merge(responses_df, on='Message ID'),
+            requests_file,
+            sentrequests_file,
+            responses_file)
 
 
 def format_result_index(text):

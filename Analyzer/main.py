@@ -8,7 +8,7 @@ from pyfiglet import Figlet
 
 if __name__ == "__main__":
     # Initial Configuration
-    result_df = h.load_input_files()
+    result_df, f1, f2, f3 = h.load_input_files()
     color = 'cyan'
     measure = Measure(result_df)
     f = Figlet(font='slant')
@@ -27,6 +27,13 @@ if __name__ == "__main__":
     rate = measure.calculate_rate()
 
     success_rate = measure.calculate_success_rate()
+
+    print("""Loaded files: \r\n"""
+          f"""\t»» Prepared Requests: {colored(f1, 'green')}\r\n"""
+          f"""\t»» Sent Requests: {colored(f2, 'green')}\r\n"""
+          f"""\t»» Responses: {colored(f3, 'green')}\r\n"""
+          """\n"""
+          )
 
     print('{} {}s'.format(h.format_result_index('Elapsed sending time'),
                           colored(total_sending_time, color)

@@ -9,15 +9,15 @@ if __name__ == "__main__":
 
     measure = Measure(result_df)
 
-    bytes_received = measure.sum_bytes_received()
-    bytes_sended = measure.sum_bytes_sended()
+    bytes_received = measure.sum_bytes_count('Raw Response')
+    bytes_sended = measure.sum_bytes_count('Serialized Request')
     test_duration = measure.calculate_test_duration()
 
     total_sending_time = measure.calculate_sending_time()
     total_receiving_time = measure.calculate_receiving_time()
 
-    result_df['Latencies'] = result_df[['Send Time','Receive Time']].apply(lambda x: measure.calculate_latency(x), axis=1)
-    
+    result_df['Latencies'] = measure.calculate_latency()
+
     throughput = measure.calculate_throughput()
     rate = measure.calculate_rate()
 

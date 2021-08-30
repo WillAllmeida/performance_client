@@ -10,42 +10,28 @@ class Measure:
         start_time = self.df.at[0, 'Send Time']
         finish_time = self.df.at[self.requests_count - 1, 'Send Time']
 
-        start_time_dt = pd.to_datetime(start_time, unit='ms')
-        finish_time_dt = pd.to_datetime(finish_time, unit='ms')
-
-        return (finish_time_dt - start_time_dt).total_seconds()
+        return (int(finish_time) - int(start_time)) / 1000
 
     def calculate_receiving_time(self):
         start_time_response = self.df.at[0, 'Receive Time']
         finish_time_response = self.df.at[self.requests_count - 1, 'Receive Time']
 
-        start_time_dt = pd.to_datetime(start_time_response, unit='ms')
-        finish_time_dt = pd.to_datetime(finish_time_response, unit='ms')
-
-        return (finish_time_dt - start_time_dt).total_seconds()
+        return (int(finish_time_response) - int(start_time_response)) / 1000
 
     def calculate_test_duration(self):
         start_time = self.df.at[0, 'Send Time']
         finish_time_response = self.df.at[self.requests_count - 1, 'Receive Time']
 
-        start_time_dt = pd.to_datetime(start_time, unit='ms')
-        finish_time_dt = pd.to_datetime(finish_time_response, unit='ms')
+        return (int(finish_time_response) - int(start_time)) / 1000
 
-        return (finish_time_dt - start_time_dt).total_seconds()
+    def sum_bytes_count(self, column):
+        return self.df[column].apply(lambda x: len(x)).sum()
 
-    def sum_bytes_sended(self):
-        return self.df['Serialized Request'].apply(lambda x: len(x)).sum()
-
-    def sum_bytes_received(self):
-        return self.df['Raw Response'].apply(lambda x: len(x)).sum()
-
-    def calculate_latency(self, row):
-        send_time = pd.to_datetime(row['Send Time'], unit='ms')
-        receive_time = pd.to_datetime(row['Receive Time'], unit='ms')
-        return (receive_time - send_time).total_seconds()
+    def calculate_latency(self):
+        return (self.df['Receive Time'].astype(int) - self.df['Send Time'].astype(int)) / 1000
 
     def calculate_throughput(self):
-        throughput = self.sum_bytes_sended() / self.calculate_test_duration()
+        throughput = self.sum_bytes_count('Serialized Request') / self.calculate_test_duration()
 
         return throughput
 

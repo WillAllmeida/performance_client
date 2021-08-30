@@ -11,7 +11,7 @@ namespace CCFPerformanceTester.Helper
 {
     public class CommandLineHelper
     {
-        public static void CreateGeneratorCommandOptions(out Option<string> methodOption, out Option<string> targetOption, out Option<int> entriesOption)
+        public static void CreateGeneratorCommandOptions(out Option<string> methodOption, out Option<string> targetOption, out Option<int> entriesOption, out Option<string> outputOption)
         {
             methodOption = new Option<string>(
                                                alias: "--method",
@@ -77,6 +77,11 @@ namespace CCFPerformanceTester.Helper
 
                 }
             );
+
+            outputOption = new Option<string>(
+                                   alias: "--requestsfile",
+                                   getDefaultValue: () => "/../results/requests.parquet",
+                                   description: "Path to Parquet with raw requests");
         }
 
         public static void CreateSenderCommandOptions(out Option<string> hostOption, out Option<string> userOption, out Option<string> userPkOption, out Option<string> caCertOption, out Option<string> infileOption, out Option<string> requestsFileOption, out Option<string> responsesFileOption)

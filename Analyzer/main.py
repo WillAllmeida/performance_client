@@ -1,14 +1,26 @@
 import datetime
+import os
 import helper as h
 from measure import Measure
 from sys import getsizeof
 from termcolor import colored
 from pyfiglet import Figlet
+import click
 
 
-if __name__ == "__main__":
+@click.command()
+@click.option('--rawrequests',
+              default="/../results/requests.parquet",
+              help='Path to input with raw requests.')
+@click.option('--requestsfile',
+              default="/../results/sentrequests.parquet",
+              help='Path to input with sent requests data.')
+@click.option('--responsesfile',
+              default="/../results/responses.parquet",
+              help='Path to input with responses data.')
+def main(rawrequests, requestsfile, responsesfile):
     # Initial Configuration
-    result_df, f1, f2, f3 = h.load_input_files()
+    result_df = h.load_input_files(rawrequests, requestsfile, responsesfile)
     color = 'cyan'
     measure = Measure(result_df)
     f = Figlet(font='slant')
@@ -29,9 +41,9 @@ if __name__ == "__main__":
     success_rate = measure.calculate_success_rate()
 
     print("""Loaded files: \r\n"""
-          f"""\t»» Prepared Requests: {colored(f1, 'green')}\r\n"""
-          f"""\t»» Sent Requests: {colored(f2, 'green')}\r\n"""
-          f"""\t»» Responses: {colored(f3, 'green')}\r\n"""
+          f"""\t»» Prepared Requests: {colored(os.getcwd() + rawrequests, 'green')}\r\n"""
+          f"""\t»» Sent Requests: {colored(os.getcwd() + requestsfile, 'green')}\r\n"""
+          f"""\t»» Responses: {colored(os.getcwd() + responsesfile, 'green')}\r\n"""
           """\n"""
           )
 
@@ -67,3 +79,7 @@ if __name__ == "__main__":
     print('{} {}% '.format(h.format_result_index('Success rate'),
                            colored(success_rate, color)
                            ))
+
+
+if __name__ == "__main__":
+    main()

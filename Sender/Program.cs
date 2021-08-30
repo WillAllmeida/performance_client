@@ -180,6 +180,8 @@ namespace Sender
             Console.WriteLine("Creating parquet files");
             ParquetHelper.CreateSentRequestsParquetFile(sentRequestsDictionary, path, requestsFile);
             ParquetHelper.CreateRequestsResponseParquetFile(responsesDictionary, path, responsesFile);
+            Console.Write($"Sent Requests file: {path + requestsFile}\r\n");
+            Console.Write($"Responses file: {path + responsesFile}\r\n");
         }
 
     }

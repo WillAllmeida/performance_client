@@ -14,27 +14,28 @@ namespace CCFPerformanceTester.Generator
     {
         static int Main(string[] args)
         {
-            Option<string> methodOption, targetOption;
+            Option<string> methodOption, targetOption, outputOption;
             Option<int> entriesOption;
 
-            CommandLineHelper.CreateGeneratorCommandOptions(out methodOption, out targetOption, out entriesOption);
+            CommandLineHelper.CreateGeneratorCommandOptions(out methodOption, out targetOption, out entriesOption, out outputOption);
 
             var rootCommand = new RootCommand
             {
                 methodOption,
                 targetOption,
                 entriesOption,
+                outputOption
             };
             
             rootCommand.Name = "run.sh";
             rootCommand.Description = "Generates a parquet file with CCF pre-serialized requests.";
  
-            rootCommand.Handler = CommandHandler.Create<string, string, int>(GenerateRequestsParquet);
+            rootCommand.Handler = CommandHandler.Create<string, string, int, string>(GenerateRequestsParquet);
             return rootCommand.InvokeAsync(args).Result;
         }
 
 
-        private static void GenerateRequestsParquet(string method, string target, int entries)
+        private static void GenerateRequestsParquet(string method, string target, int entries, string requestsfile)
         {
             List<int> requestIds;
             List<string> requestBodies;
@@ -43,11 +44,11 @@ namespace CCFPerformanceTester.Generator
 
             GenerateRequestStrings(method, target, entries, out requestIds, out requestBodies);
 
-            string path = Directory.GetCurrentDirectory() + "/../results/requests.parquet";
+            string path = Directory.GetCurrentDirectory() + requestsfile;
 
             ParquetHelper.CreateRawRequestParquetFile(requestIds, requestBodies, path);
 
-            Console.WriteLine("Requests were successfully generated");
+            Console.WriteLine($"Requests were successfully generated: {path}");
         }
 
         private static void GenerateRequestStrings(string method, string target, int entries, out List<int> requestIds, out List<string> requestBodies)

@@ -10,17 +10,20 @@ import click
 
 @click.command()
 @click.option('--rawrequests',
+              'raw_requests',
               default="/../results/requests.parquet",
               help='Path to input with raw requests.')
 @click.option('--requestsfile',
+              'requests_file',
               default="/../results/sentrequests.parquet",
               help='Path to input with sent requests data.')
 @click.option('--responsesfile',
+              'responses_file',
               default="/../results/responses.parquet",
               help='Path to input with responses data.')
-def main(rawrequests, requestsfile, responsesfile):
+def main(raw_requests, requests_file, responses_file):
     # Initial Configuration
-    result_df = h.load_input_files(rawrequests, requestsfile, responsesfile)
+    result_df = h.load_input_files(raw_requests, requests_file, responses_file)
     color = 'cyan'
     measure = Measure(result_df)
     f = Figlet(font='slant')
@@ -41,9 +44,9 @@ def main(rawrequests, requestsfile, responsesfile):
     success_rate = measure.calculate_success_rate()
 
     print("""Loaded files: \r\n"""
-          f"""\t»» Prepared Requests: {colored(os.getcwd() + rawrequests, 'green')}\r\n"""
-          f"""\t»» Sent Requests: {colored(os.getcwd() + requestsfile, 'green')}\r\n"""
-          f"""\t»» Responses: {colored(os.getcwd() + responsesfile, 'green')}\r\n"""
+          f"""\t»» Prepared Requests: {colored(os.getcwd() + raw_requests, 'green')}\r\n"""
+          f"""\t»» Sent Requests: {colored(os.getcwd() + requests_file, 'green')}\r\n"""
+          f"""\t»» Responses: {colored(os.getcwd() + responses_file, 'green')}\r\n"""
           """\n"""
           )
 

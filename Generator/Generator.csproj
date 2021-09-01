@@ -6,6 +6,11 @@
     <Version>0.1.0</Version>
     <Authors>William Almeida</Authors>
     <Product />
+    <RepositoryUrl>https://github.com/WillAllmeida/performance_client</RepositoryUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +20,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Helper\Helper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="run.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

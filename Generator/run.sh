@@ -1,1 +1,1 @@
-./publish/Generator $1 $2 $3 $4 $5 $6
+./Generator $1 $2 $3 $4 $5 $6

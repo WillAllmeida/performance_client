@@ -14,4 +14,10 @@
     <ProjectReference Include="..\Helper\Helper.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="run.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -38,7 +38,7 @@ namespace CCFPerformanceTester.Helper
                 sendTime[k] = requestsDictionary[k];
             }
 
-            path = path + relativePath;
+            path = Path.GetFullPath(path + relativePath);
 
             var indexColumn = new DataColumn(
                             new DataField<int>("Message ID"),
@@ -88,7 +88,7 @@ namespace CCFPerformanceTester.Helper
                 rawResponse[k] = responsesDictionary[k].RawResponse;
             }
 
-            path = path + relativePath;
+            path = Path.GetFullPath(path + relativePath);
 
             var indexColumn = new DataColumn(
                             new DataField<int>("Message ID"),
@@ -111,7 +111,7 @@ namespace CCFPerformanceTester.Helper
         {
             Dictionary<int, string> serializedRequests = new Dictionary<int, string>();
 
-            string path = Directory.GetCurrentDirectory() + infile;
+            string path = Path.GetFullPath(Directory.GetCurrentDirectory() + "/" + infile);
 
             using (Stream fileStream = File.OpenRead(path))
             {

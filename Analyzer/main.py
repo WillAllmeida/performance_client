@@ -6,23 +6,45 @@ from sys import getsizeof
 from termcolor import colored
 from pyfiglet import Figlet
 import click
+import pathlib
+from pathlib import Path
+
+
+def validate_file(ctx, param, value):
+    path = Path(os.getcwd() + "/" + value)
+
+    if path.is_file():
+        return os.path.abspath(path)
+    else:
+        error_message = ""
+        if(param.name == "raw_requests"):
+            error_message = "input with raw requests"
+        elif(param.name == "requests_file"):
+            error_message = "input with sent requests data"
+        elif(param.name == "responses_file"):
+            error_message = "input with sent requests data"
+        raise click.BadParameter(f"Invalid {error_message}, verify if the entered path contains a valid file")
 
 
 @click.command()
 @click.option('--rawrequests',
               'raw_requests',
               default="/../results/requests.parquet",
-              help='Path to input with raw requests.')
+              help='Path to input with raw requests.',
+              callback=validate_file)
 @click.option('--requestsfile',
               'requests_file',
               default="/../results/sentrequests.parquet",
-              help='Path to input with sent requests data.')
+              help='Path to input with sent requests data.',
+              callback=validate_file)
 @click.option('--responsesfile',
               'responses_file',
               default="/../results/responses.parquet",
-              help='Path to input with responses data.')
+              help='Path to input with responses data.',
+              callback=validate_file)
 def main(raw_requests, requests_file, responses_file):
     # Initial Configuration
+
     result_df = h.load_input_files(raw_requests, requests_file, responses_file)
     color = 'cyan'
     measure = Measure(result_df)
@@ -44,9 +66,9 @@ def main(raw_requests, requests_file, responses_file):
     success_rate = measure.calculate_success_rate()
 
     print("""Loaded files: \r\n"""
-          f"""\t»» Prepared Requests: {colored(os.getcwd() + raw_requests, 'green')}\r\n"""
-          f"""\t»» Sent Requests: {colored(os.getcwd() + requests_file, 'green')}\r\n"""
-          f"""\t»» Responses: {colored(os.getcwd() + responses_file, 'green')}\r\n"""
+          f"""\t»» Prepared Requests: {colored(raw_requests, 'green')}\r\n"""
+          f"""\t»» Sent Requests: {colored(requests_file, 'green')}\r\n"""
+          f"""\t»» Responses: {colored(responses_file, 'green')}\r\n"""
           """\n"""
           )
 

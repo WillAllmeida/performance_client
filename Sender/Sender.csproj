@@ -4,6 +4,10 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Sender</RootNamespace>
+    <Version>0.1.5</Version>
+    <Authors>William Almeida</Authors>
+    <Company>William Almeida</Company>
+    <RepositoryUrl>https://github.com/WillAllmeida/performance_client</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

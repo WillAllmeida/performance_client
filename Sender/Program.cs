@@ -56,17 +56,22 @@ namespace Sender
             await SendAllRequests(requestMessages, host, user, pk, caCert, requestsFile, responsesFile);
         }
 
-        private static async Task<SslStream> AuthenticateClient(string host, string userCert, string userPK, string CAcert)
+        private static async Task<SslStream> AuthenticateClient(string host, string userCert, string userPK, string CAcert, string path)
         {
+            userCert = Path.GetFullPath(path + userCert);
+            userPK = Path.GetFullPath(path + userPK);
+            CAcert = Path.GetFullPath(path + CAcert);
+
+
             var client = new TcpClient();
 
-            var hostData = host.Split(':', 2);
+            var hostData = new UriBuilder(host);
 
 
             var store =  new X509Store(StoreName.My, StoreLocation.CurrentUser);
             store.Open(OpenFlags.ReadWrite);
 
-            await client.ConnectAsync(hostData[0], Convert.ToInt32(hostData[1]));
+            await client.ConnectAsync(hostData.Host, hostData.Port);
 
             var serverCertificate = X509Certificate2.CreateFromPemFile(userCert, userPK);
             var newtorkCertificate = new X509Certificate2(CAcert);
@@ -87,7 +92,7 @@ namespace Sender
             );
 
             await sslStream.AuthenticateAsClientAsync(
-            hostData[0],
+            hostData.Host,
             certificateCollection,
             SslProtocols.Tls12,
             true);
@@ -163,9 +168,10 @@ namespace Sender
 
         private static async Task SendAllRequests(Dictionary<int, string> requestsDictionary, string host, string userCert, string userPK, string CAcert, string requestsFile, string responsesFile)
         {
-            var sslStream = await AuthenticateClient(host, userCert, userPK, CAcert);
+            string path = Directory.GetCurrentDirectory() + "/";
 
-            string path = Directory.GetCurrentDirectory();
+            var sslStream = await AuthenticateClient(host, userCert, userPK, CAcert, path);
+
 
             var readResponsesTask = ReadResponsesContinuosly(sslStream, requestsDictionary.Count);
             var sendRequestsTask = SendStreamAsync(requestsDictionary, sslStream);
@@ -180,8 +186,8 @@ namespace Sender
             Console.WriteLine("Creating parquet files");
             ParquetHelper.CreateSentRequestsParquetFile(sentRequestsDictionary, path, requestsFile);
             ParquetHelper.CreateRequestsResponseParquetFile(responsesDictionary, path, responsesFile);
-            Console.Write($"Sent Requests file: {path + requestsFile}\r\n");
-            Console.Write($"Responses file: {path + responsesFile}\r\n");
+            Console.Write($"Sent Requests file: {Path.GetFullPath(path + requestsFile)}\r\n");
+            Console.Write($"Responses file: {Path.GetFullPath(path + responsesFile)}\r\n");
         }
 
     }

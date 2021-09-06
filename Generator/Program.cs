@@ -44,7 +44,7 @@ namespace CCFPerformanceTester.Generator
 
             GenerateRequestStrings(method, target, entries, out requestIds, out requestBodies);
 
-            string path = Directory.GetCurrentDirectory() + requestsfile;
+            string path = Path.GetFullPath(Directory.GetCurrentDirectory() + "/" + requestsfile);
 
             ParquetHelper.CreateRawRequestParquetFile(requestIds, requestBodies, path);
 

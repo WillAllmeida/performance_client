@@ -1,6 +1,6 @@
 # Performance Testing Client
 
-
+![Screenshot](docs/test_result.jpg)
 
 ## Install .NET 5 
 
